@@ -1,4 +1,4 @@
-from sklearn.datasets import fetch_mldata
+from sklearn.datasets import fetch_openml
 import numpy as np
 # from tensorflow.examples.tutorials.mnist import input_data
 import torchvision
@@ -8,17 +8,22 @@ __author__ = 'garrett_local'
 
 
 def _prepare_mnist_data():
-    mnist = fetch_mldata('MNIST original', data_home='~/Dataset/')
+    # mnist = fetch_openml('MNIST original', data_home='~/Dataset/')
     # mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
-    # mnist = torchvision.datasets.MNIST('../../../Data/',train=True,download=True)
+    mnist = torchvision.datasets.MNIST('Dataset/',train=True,download=True)
     x = mnist.data
-    y = mnist.target
+    y = mnist.targets
     x = np.reshape(x, (x.shape[0], 28, 28, 1)) / 255.
-    train_x = np.asarray(x[:60000], dtype=np.float32)
-    train_y = np.asarray(y[:60000], dtype=np.int32)
-    test_x = np.asarray(x[60000:], dtype=np.float32)
-    test_y = np.asarray(y[60000:], dtype=np.int32)
+    train_x = np.asarray(x[:], dtype=np.float32)
+    train_y = np.asarray(y[:], dtype=np.int32)
 
+    mnist = torchvision.datasets.MNIST('Dataset/', train=False, download=True)
+    x = mnist.data
+    y = mnist.targets
+    x = np.reshape(x, (x.shape[0], 28, 28, 1)) / 255.
+    test_x = np.asarray(x[:], dtype=np.float32)
+    test_y = np.asarray(y[:], dtype=np.int32)
+    
     # Binarize labels.
     train_y[train_y % 2 == 1] = -1
     train_y[train_y % 2 == 0] = 1
@@ -67,3 +72,5 @@ class MnistPnDataset(pu_learning_dataset.PnLearningDataSet):
 
     def _original_test_y(self):
         return self._test_y
+
+_prepare_mnist_data()

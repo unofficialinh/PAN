@@ -14,7 +14,7 @@ def _binarize(labels):
 
 
 def _prepare_cifar10_data():
-    data_path = '/home/huwenp/Dataset/CIFAR/'
+    data_path = 'Dataset/CIFAR/'
     url = 'http://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
     file_manager.create_dirname_if_not_exist(data_path)
     file_name = os.path.basename(url)

@@ -1,40 +1,34 @@
-from sklearn.datasets import fetch_mldata
 import numpy as np
-# from tensorflow.examples.tutorials.mnist import input_data
 import torchvision
 import helper.pu_learning_dataset as pu_learning_dataset
 import pdb
+from sklearn.datasets import fetch_20newsgroups, fetch_20newsgroups_vectorized
 __author__ = 'garrett_local'
 
 
-def _prepare_mnist_data():
-    mnist = fetch_mldata('MNIST original', data_home='../../../Data/')
-    # mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
-    # mnist = torchvision.datasets.MNIST('../../../Data/',train=True,download=True)
-    x = mnist.data
-    y = mnist.target
-    x = np.reshape(x, (x.shape[0], 28, 28, 1)) / 255.
-    train_x = np.asarray(x[:60000], dtype=np.float32)
-    train_y = np.asarray(y[:60000], dtype=np.int32)
-    test_x = np.asarray(x[60000:], dtype=np.float32)
-    test_y = np.asarray(y[60000:], dtype=np.int32)
-    pdb.set_trace()
+def _prepare_20news_data():
+    train_x, train_y = fetch_20newsgroups_vectorized(subset="train", return_X_y=True, data_home='../Dataset/20News')
+    test_x, test_y = fetch_20newsgroups_vectorized(subset="test", return_X_y=True, data_home='../Dataset/20News')
+
+    # pdb.set_trace()
     # Binarize labels.
-    train_y[train_y % 2 == 1] = -1
-    train_y[train_y % 2 == 0] = 1
-    train_y[train_y == -1] = 0
-    test_y[test_y % 2 == 1] = -1
-    test_y[test_y % 2 == 0] = 1
-    test_y[test_y == -1] = 0
+    train_y[train_y > 10] = 19
+    train_y[train_y <= 10] = 1
+    train_y[train_y == 19] = 0
+    test_y[test_y > 10] = 19
+    test_y[test_y <= 10] = 1
+    test_y[test_y == 19] = 0
+    train_x = train_x.toarray()
+    test_x = test_x.toarray()
     return train_x, train_y, test_x, test_y
 
 
-class MnistDataset(pu_learning_dataset.PuLearningDataSet):
+class NewsDataset(pu_learning_dataset.PuLearningDataSet):
 
     def __init__(self, *args, **kwargs):
         self._train_x, self._train_y, self._test_x, self._test_y = \
-            _prepare_mnist_data()
-        super(MnistDataset, self).__init__(*args, **kwargs)
+            _prepare_20news_data()
+        super(NewsDataset, self).__init__(*args, **kwargs)
 
     def _original_train_x(self):
         return self._train_x
@@ -49,12 +43,12 @@ class MnistDataset(pu_learning_dataset.PuLearningDataSet):
         return self._test_y
 
 
-class MnistPnDataset(pu_learning_dataset.PnLearningDataSet):
+class NewsPnDataset(pu_learning_dataset.PnLearningDataSet):
 
     def __init__(self, *args, **kwargs):
         self._train_x, self._train_y, self._test_x, self._test_y = \
-            _prepare_mnist_data()
-        super(MnistPnDataset, self).__init__(*args, **kwargs)
+            _prepare_20news_data()
+        super(NewsPnDataset, self).__init__(*args, **kwargs)
 
     def _original_train_x(self):
         return self._train_x

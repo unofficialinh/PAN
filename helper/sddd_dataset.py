@@ -1,4 +1,4 @@
-from sklearn.datasets import fetch_mldata
+from sklearn.datasets import fetch_openml
 import numpy as np
 # from tensorflow.examples.tutorials.mnist import input_data
 import torchvision
@@ -14,7 +14,7 @@ def _prepare_sddd_data():
 
     # mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
     # mnist = torchvision.datasets.MNIST('../../../Data/',train=True,download=True)
-    sddd_f = open("../../Data/SDDD/sddd", "r")
+    sddd_f = open("../Dataset/SDDD/sddd", "r")
     sddd = sddd_f.readlines()
     all_x = []
     for sd_x in sddd:

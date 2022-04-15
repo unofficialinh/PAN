@@ -19,7 +19,7 @@ def load_dataset(cfg):
     if dataset_name == 'sensor':
         return cifar10_dataset.Cifar10Dataset, cifar10_dataset.Cifar10PnDataset
     if dataset_name == 'news':
-        return news_dataset.MnistDataset, news_dataset.MnistPnDataset
+        return news_dataset.NewsDataset, news_dataset.NewsPnDataset
 
 
 # def load_network(cfg):
