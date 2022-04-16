@@ -300,8 +300,9 @@ all_f1 = []
 all_acc = []
 big_acc = 100
 big_f = 0
+decrease_epoch = 0
 
-optimize_type = "kl"
+optimize_type = "optimizer"
 loss_type = "sum"
 ratio = 1
 
@@ -555,6 +556,7 @@ for imgs in training_iterator:
 
         if training_iterator._finished_epoch != epoch:
             epoch_num += 1
+            decrease_epoch += 1
             # adjust_lr(optimizer_D, epoch_num)
             # adjust_lr(optimizer_R, epoch_num)
             epoch = training_iterator._finished_epoch
@@ -607,8 +609,13 @@ for imgs in training_iterator:
 
             if acc < big_acc:
                 big_acc = acc
+                decrease_epoch = 0
             if f1 > big_f:
                 big_f = f1
+                decrease_epoch = 0
+
+            if decrease_epoch >= 30 or acc - big_acc >= 0.03 or big_f - f1 >= 0.03:
+                break
         # batches_done = training_iterator._finished_epoch * training_iterator._len + i
         i = i + 1
         # if batches_done % opt.sample_interval == 0:

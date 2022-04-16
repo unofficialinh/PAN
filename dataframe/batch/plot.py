@@ -1,8 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-dataset = "news"
-batch_sizes = [300, 500, 1000, 2000, 3000, 4000, 6000]
+dataset = "mnist"
+# batch_sizes = [300, 500, 1000, 2000, 3000, 4000, 6000]
+batch_sizes = [500, 1000, 2000, 3000, 5000, 6000, 10000, 15000, 20000, 30000, 60000]
 
 summary = {"batch_size": [], "acc": [], "f1": []}
 # df = pd.read_csv("mnist_original.csv")
