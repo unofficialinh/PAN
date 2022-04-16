@@ -1,14 +1,15 @@
 import numpy as np
 import torchvision
 import helper.pu_learning_dataset as pu_learning_dataset
+from sklearn.feature_extraction.text import TfidfVectorizer
 import pdb
 from sklearn.datasets import fetch_20newsgroups, fetch_20newsgroups_vectorized
 __author__ = 'garrett_local'
 
 
 def _prepare_20news_data():
-    train_x, train_y = fetch_20newsgroups_vectorized(subset="train", return_X_y=True, data_home='../Dataset/20News')
-    test_x, test_y = fetch_20newsgroups_vectorized(subset="test", return_X_y=True, data_home='../Dataset/20News')
+    train_x, train_y = fetch_20newsgroups(subset="train", return_X_y=True, data_home='./Dataset/20News')
+    test_x, test_y = fetch_20newsgroups(subset="test", return_X_y=True, data_home='./Dataset/20News')
 
     # pdb.set_trace()
     # Binarize labels.
@@ -18,7 +19,11 @@ def _prepare_20news_data():
     test_y[test_y > 10] = 19
     test_y[test_y <= 10] = 1
     test_y[test_y == 19] = 0
+
+    tf = TfidfVectorizer(stop_words='english', max_features=784)
+    train_x = tf.fit_transform(train_x)
     train_x = train_x.toarray()
+    test_x = tf.transform(test_x)
     test_x = test_x.toarray()
     return train_x, train_y, test_x, test_y
 

@@ -212,6 +212,7 @@ class PuLearningDataSet(object):
         return self._batch_size
 
     def _prepare_pu_training_data(self):
+        print("batch size =", self._batch_size)
         positive = self._positive
         negative = self._negative
         train_y = self._original_train_y()

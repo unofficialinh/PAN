@@ -44,12 +44,9 @@ img_shape = (1, 28, 28)
 torch.cuda.set_device(0)
 cuda = True if torch.cuda.is_available() else False
 
-ratios = [0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2]
-optimize_type = "kl"
-loss_type = "sum"
-# ratio = 0.6
-# ratios = [0.6]
-for ratio in ratios:
+# batch_sizes = [300, 500, 1000, 2000, 3000, 4000, 6000]
+batch_sizes = [500]
+for batch_size in batch_sizes:
 
     def adjust_lr(optimizer, epoch):
         lr = opt.lr
@@ -253,6 +250,7 @@ for ratio in ratios:
         nnpu_cfg['network']['network_name'],
         helper.get_unique_name()
     )
+    upu_cfg['dataset']['batch_size'] = batch_size
     log_data = helper.LogData()
 
     # upu and nnpu.
@@ -303,6 +301,10 @@ for ratio in ratios:
     big_acc = 100
     big_f = 0
 
+    optimize_type = "batch"
+    loss_type = "sum"
+    ratio = 1
+
     if optimize_type == "kl":
         if ratio != 1:
             filepath = f"dataframe/{optimize_type}/{opt.dataset}_{loss_type}_{ratio}.csv"
@@ -311,7 +313,7 @@ for ratio in ratios:
     if optimize_type == "optimizer":
         filepath = f"dataframe/{optimize_type}/{opt.dataset}_{optimizer}.csv"
     if optimize_type == "batch":
-        filepath = f"dataframe/{optimize_type}/{opt.dataset}_{upu_cfg.get('batch_size')}.csv"
+        filepath = f"dataframe/{optimize_type}/{opt.dataset}_{batch_size}.csv"
 
     f = open(filepath, "w")
     f.writelines("loss_d,loss_r,acc,f1\n")
@@ -384,9 +386,9 @@ for ratio in ratios:
                 score_R_h = score_R[:score_D_p.shape[0]]
 
                 # top-k loss2 (sum)
-                kl = (1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (2 * score_D_u - 1.0)
-                k = int(score_R.shape[0] * ratio)
-                kl, indices = torch.topk(kl, k, dim=0)
+                # kl = (1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (2 * score_D_u - 1.0)
+                # k = int(score_R.shape[0] * ratio)
+                # kl, indices = torch.topk(kl, k, dim=0)
 
                 # top-k KL(Du||Cu)
                 # kl = score_D_u * torch.log(score_D_u / score_R) + (1 - score_D_u) * torch.log((1 - score_D_u) / (1 - score_R))
@@ -424,10 +426,10 @@ for ratio in ratios:
                     torch.max(torch.log(1.0 - score_D_u_h + eps) - torch.log(1.0 - torch.mean(d_rate_u)),
                               torch.zeros(d_rate_u.shape).cuda()))
 
-                # loss2 = 0.0001 * torch.sum((1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (
-                #         2 * score_D_u - 1.0))  # torch.mean(d_rate_u)
+                loss2 = 0.0001 * torch.sum((1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (
+                        2 * score_D_u - 1.0))  # torch.mean(d_rate_u)
 
-                loss2 = 0.0001 * torch.sum(kl)
+                # loss2 = 0.0001 * torch.sum(kl)
 
                 loss = loss1 + loss2
 
@@ -469,9 +471,9 @@ for ratio in ratios:
                 score_R_h = score_R[:score_D_p.shape[0]]
 
                 # top-k loss2
-                kl = (1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (2 * score_D_u - 1.0)
-                k = int(score_R.shape[0] * ratio)
-                kl, indices = torch.topk(kl, k, dim=0)
+                # kl = (1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (2 * score_D_u - 1.0)
+                # k = int(score_R.shape[0] * ratio)
+                # kl, indices = torch.topk(kl, k, dim=0)
 
                 # top-k KL(Du||Cu)
                 # kl = score_D_u * torch.log(score_D_u / score_R) + (1 - score_D_u) * torch.log((1 - score_D_u) / (1 - score_R))
@@ -492,10 +494,10 @@ for ratio in ratios:
                     torch.max(torch.log(1.0 - score_D_u_h + eps) - torch.log(1.0 - torch.mean(d_rate_u)),
                               torch.zeros(d_rate_u.shape).cuda()))
 
-                # loss2 = 0.0001 * torch.sum((1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (
-                #             2 * score_D_u - 1.0))  # torch.mean(d_rate_u)
+                loss2 = 0.0001 * torch.sum((1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (
+                            2 * score_D_u - 1.0))  # torch.mean(d_rate_u)
 
-                loss2 = 0.0001 * torch.sum(kl)
+                # loss2 = 0.0001 * torch.sum(kl)
 
                 loss = loss1 + loss2
                 loss_r = loss.clone()
@@ -613,7 +615,6 @@ for ratio in ratios:
             # batches_done = training_iterator._finished_epoch * training_iterator._len + i
             i = i + 1
             # if batches_done % opt.sample_interval == 0:
-    print(loss_type, ratio)
     print("acc:", 1 - big_acc)
     print("f:", big_f)
     print("-")
