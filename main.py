@@ -34,7 +34,7 @@ parser.add_argument('--sample_interval', type=int, default=400, help='interval b
 parser.add_argument('--gpu', type=int, default=0, help='gpu no.')
 parser.add_argument('--model', type=str, default='pan', choices=['pan', 'nnpu', 'upu', 'agan'],
                     help='Please select model that you want to run.')
-parser.add_argument('--dataset', type=str, default='news', choices=['mnist', 'cifar10', 'sddd', 'news'],
+parser.add_argument('--dataset', type=str, default='cifar10', choices=['mnist', 'cifar10', 'sddd', 'news'],
                     help='Using dataset.')
 opt = parser.parse_args()
 print(opt)
@@ -44,7 +44,7 @@ img_shape = (1, 28, 28)
 torch.cuda.set_device(0)
 cuda = True if torch.cuda.is_available() else False
 
-ratios = [0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2]
+ratios = [0.7, 0.6, 0.5, 0.4]
 optimize_type = "kl"
 loss_type = "sum"
 # ratio = 0.6
@@ -302,6 +302,7 @@ for ratio in ratios:
     all_acc = []
     big_acc = 100
     big_f = 0
+    decrease_epoch = 0
 
     if optimize_type == "kl":
         if ratio != 1:
@@ -608,8 +609,16 @@ for ratio in ratios:
 
                 if acc < big_acc:
                     big_acc = acc
+                    decrease_epoch = 0
                 if f1 > big_f:
                     big_f = f1
+                    decrease_epoch = 0
+
+                if acc - big_acc >= 0.01 and big_f - f1 >= 0.01:
+                    decrease_epoch += 1
+
+                if decrease_epoch >= 15:
+                    break
             # batches_done = training_iterator._finished_epoch * training_iterator._len + i
             i = i + 1
             # if batches_done % opt.sample_interval == 0:
