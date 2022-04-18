@@ -1,9 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-dataset = "news"
+dataset = "cifar10"
 loss_type = "sum"
-ratios = [0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2]
+ratios = [0.8, 0.7, 0.6, 0.5, 0.4]
 summary = {"ratio": [], "acc": [], "f1": []}
 df = pd.read_csv(f"{dataset}_original.csv")
 summary["ratio"].append(1)

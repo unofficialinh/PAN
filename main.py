@@ -44,9 +44,9 @@ img_shape = (1, 28, 28)
 torch.cuda.set_device(0)
 cuda = True if torch.cuda.is_available() else False
 
-ratios = [0.7, 0.6, 0.5, 0.4]
+ratios = [0.8, 0.7, 0.6, 0.5, 0.4]
 optimize_type = "kl"
-loss_type = "sum"
+loss_type = "3rd"
 # ratio = 0.6
 # ratios = [0.6]
 for ratio in ratios:
@@ -385,21 +385,21 @@ for ratio in ratios:
                 score_R_h = score_R[:score_D_p.shape[0]]
 
                 # top-k loss2 (sum)
-                kl = (1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (2 * score_D_u - 1.0)
-                k = int(score_R.shape[0] * ratio)
-                kl, indices = torch.topk(kl, k, dim=0)
+                # kl = (1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (2 * score_D_u - 1.0)
+                # k = int(score_R.shape[0] * ratio)
+                # kl, indices = torch.topk(kl, k, dim=0)
 
                 # top-k KL(Du||Cu)
                 # kl = score_D_u * torch.log(score_D_u / score_R) + (1 - score_D_u) * torch.log((1 - score_D_u) / (1 - score_R))
 
                 # top-k KL(Du||1-Cu)
-                # kl = score_D_u * torch.log(score_D_u / (1 - score_R)) + (1 - score_D_u) * torch.log((1 - score_D_u) / score_R)
+                kl = score_D_u * torch.log(score_D_u / (1 - score_R)) + (1 - score_D_u) * torch.log((1 - score_D_u) / score_R)
 
-                # k = int(score_R.shape[0]*ratio)
-                # # kl, indices = torch.topk(kl, k, dim=0, sorted=False, largest=False)
+                k = int(score_R.shape[0]*ratio)
+                kl, indices = torch.topk(kl, k, dim=0, sorted=False, largest=False)
                 # kl, indices = torch.topk(kl, k, dim=0, sorted=False)
-                # score_R = torch.index_select(score_R, dim=0, index=indices.squeeze())
-                # score_D_u = torch.index_select(score_D_u, dim=0, index=indices.squeeze())
+                score_R = torch.index_select(score_R, dim=0, index=indices.squeeze())
+                score_D_u = torch.index_select(score_D_u, dim=0, index=indices.squeeze())
 
                 R_rate = score_R.clone().detach()
                 d_rate = score_D.clone().detach()
@@ -425,10 +425,10 @@ for ratio in ratios:
                     torch.max(torch.log(1.0 - score_D_u_h + eps) - torch.log(1.0 - torch.mean(d_rate_u)),
                               torch.zeros(d_rate_u.shape).cuda()))
 
-                # loss2 = 0.0001 * torch.sum((1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (
-                #         2 * score_D_u - 1.0))  # torch.mean(d_rate_u)
+                loss2 = 0.0001 * torch.sum((1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (
+                        2 * score_D_u - 1.0))  # torch.mean(d_rate_u)
 
-                loss2 = 0.0001 * torch.sum(kl)
+                # loss2 = 0.0001 * torch.sum(kl)
 
                 loss = loss1 + loss2
 
@@ -470,21 +470,21 @@ for ratio in ratios:
                 score_R_h = score_R[:score_D_p.shape[0]]
 
                 # top-k loss2
-                kl = (1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (2 * score_D_u - 1.0)
-                k = int(score_R.shape[0] * ratio)
-                kl, indices = torch.topk(kl, k, dim=0)
+                # kl = (1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (2 * score_D_u - 1.0)
+                # k = int(score_R.shape[0] * ratio)
+                # kl, indices = torch.topk(kl, k, dim=0)
 
                 # top-k KL(Du||Cu)
                 # kl = score_D_u * torch.log(score_D_u / score_R) + (1 - score_D_u) * torch.log((1 - score_D_u) / (1 - score_R))
 
                 # top-k KL(Du||1-Cu)
-                # kl = score_D_u * torch.log(score_D_u / (1 - score_R)) + (1 - score_D_u) * torch.log((1 - score_D_u) / score_R)
+                kl = score_D_u * torch.log(score_D_u / (1 - score_R)) + (1 - score_D_u) * torch.log((1 - score_D_u) / score_R)
 
-                # k = int(score_R.shape[0]*ratio)
-                # # kl, indices = torch.topk(kl, k, dim=0, sorted=False, largest=False)
+                k = int(score_R.shape[0]*ratio)
+                kl, indices = torch.topk(kl, k, dim=0, sorted=False, largest=False)
                 # kl, indices = torch.topk(kl, k, dim=0, sorted=False)
-                # score_R = torch.index_select(score_R, dim=0, index=indices.squeeze())
-                # score_D_u = torch.index_select(score_D_u, dim=0, index=indices.squeeze())
+                score_R = torch.index_select(score_R, dim=0, index=indices.squeeze())
+                score_D_u = torch.index_select(score_D_u, dim=0, index=indices.squeeze())
 
                 R_rate = score_R.clone().detach()
                 d_rate = score_D.clone().detach()
@@ -493,10 +493,10 @@ for ratio in ratios:
                     torch.max(torch.log(1.0 - score_D_u_h + eps) - torch.log(1.0 - torch.mean(d_rate_u)),
                               torch.zeros(d_rate_u.shape).cuda()))
 
-                # loss2 = 0.0001 * torch.sum((1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (
-                #             2 * score_D_u - 1.0))  # torch.mean(d_rate_u)
+                loss2 = 0.0001 * torch.sum((1 * torch.log(1 - score_R + eps + 0.0) - torch.log(score_R + eps + 0.0)) * (
+                            2 * score_D_u - 1.0))  # torch.mean(d_rate_u)
 
-                loss2 = 0.0001 * torch.sum(kl)
+                # loss2 = 0.0001 * torch.sum(kl)
 
                 loss = loss1 + loss2
                 loss_r = loss.clone()

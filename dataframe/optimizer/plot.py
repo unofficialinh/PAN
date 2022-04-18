@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-dataset = "news"
+dataset = "cifar10"
 df = pd.read_csv(f"{dataset}_adam.csv")
 max_f1 = df["f1"].max()
 id_max_f1 = df["f1"].idxmax()
