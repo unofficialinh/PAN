@@ -212,6 +212,7 @@ class PuLearningDataSet(object):
         return self._batch_size
 
     def _prepare_pu_training_data(self):
+        q=1
         print("batch size =", self._batch_size)
         positive = self._positive
         negative = self._negative
@@ -222,7 +223,9 @@ class PuLearningDataSet(object):
             np.random.shuffle(self._shuffled_indexes)
         assert self._shuffled_indexes.shape[0] == len(train_y)
         train_y = train_y[self._shuffled_indexes]
+        train_y = train_y[:int(len(train_y)/q)]
         train_x = train_x[self._shuffled_indexes]
+        train_x = train_x[:int(len(train_x)/q)]
         true_y = copy.deepcopy(train_y)
         num_pos = (train_y == positive).sum()
         num_neg = (train_y == negative).sum()

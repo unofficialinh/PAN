@@ -302,7 +302,7 @@ big_acc = 100
 big_f = 0
 decrease_epoch = 0
 
-optimize_type = "optimizer"
+optimize_type = "early_stopping"
 loss_type = "sum"
 ratio = 1
 
@@ -311,7 +311,7 @@ if optimize_type == "kl":
         filepath = f"dataframe/{optimize_type}/{opt.dataset}_{loss_type}_{ratio}.csv"
     else:
         filepath = f"dataframe/{optimize_type}/{opt.dataset}_original.csv"
-if optimize_type == "optimizer":
+if optimize_type == "early_stopping":
     filepath = f"dataframe/{optimize_type}/{opt.dataset}_{optimizer}.csv"
 if optimize_type == "batch":
     filepath = f"dataframe/{optimize_type}/{opt.dataset}_{upu_cfg.get('batch_size')}.csv"
